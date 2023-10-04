@@ -28,7 +28,9 @@ const CharacterFilter = () => {
     setGenderFilter,
     setCurrentPage,
   } = useCharacterContext();
-  const [localNameFilter, setLocalNameFilter] = useState("");
+  const [localNameFilter, setLocalNameFilter] = useState<string>("");
+  const [error, setError] = useState<string>("");
+  const [isValid, setIsValid] = useState<boolean>(true);
 
   const handleClear = () => {
     setLocalNameFilter("");
@@ -37,6 +39,8 @@ const CharacterFilter = () => {
     setStatusFilter("");
     setGenderFilter("");
     setCurrentPage(1);
+    setError("");
+    setIsValid(true);
   };
 
   useEffect(() => {
@@ -53,7 +57,15 @@ const CharacterFilter = () => {
   }, [localNameFilter]);
 
   const handleInputChange = (str: string) => {
-    if (str.match(/^[a-zA-Z0-9\s-]*$/)) setLocalNameFilter(str);
+    setError("");
+    setIsValid(true);
+
+    if (str.match(/^[a-zA-Z0-9\s-]*$/)) {
+      setLocalNameFilter(str);
+    } else {
+      setError("Key not allowed");
+      setIsValid(false);
+    }
   };
 
   return (
@@ -68,6 +80,8 @@ const CharacterFilter = () => {
             onChange={(e: ChangeEvent<HTMLInputElement>) =>
               handleInputChange(e.target.value)
             }
+            error={!isValid}
+            helperText={error}
           />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
