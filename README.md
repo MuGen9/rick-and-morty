@@ -1,4 +1,4 @@
-# Getting Started with Create React App
+# [Live version](https://rick-and-morty-maksp.netlify.app):
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
