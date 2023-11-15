@@ -9,48 +9,50 @@ import {
   Box,
   TextField,
 } from "@mui/material";
-import { useCharacterContext } from "../providers/CharacterContextProvider";
+import { setFilters } from "../redux/characterSlice";
 import {
   speciesOptions,
   statusOptions,
   genderOptions,
 } from "../utils/filterOptions";
+import { useAppDispatch, useAppSelector } from "../redux/hooks";
+import { CharacterGender, CharacterStatus } from "../utils/types";
 
-const CharacterFilter = () => {
-  const {
-    nameFilter,
-    setNameFilter,
-    speciesFilter,
-    setSpeciesFilter,
-    statusFilter,
-    setStatusFilter,
-    genderFilter,
-    setGenderFilter,
-    setCurrentPage,
-  } = useCharacterContext();
-  const [localNameFilter, setLocalNameFilter] = useState<string>("");
+const CharacterFilterRedux = () => {
+  const [localNameFilter, setLocalNameFilter] = useState<string | undefined>(
+    ""
+  );
   const [error, setError] = useState<string>("");
   const [isValid, setIsValid] = useState<boolean>(true);
 
+  const filters = useAppSelector((state) => state.characters.filters);
+  const dispatch = useAppDispatch();
+
   const handleClear = () => {
     setLocalNameFilter("");
-    setNameFilter("");
-    setSpeciesFilter("");
-    setStatusFilter("");
-    setGenderFilter("");
-    setCurrentPage(1);
+    dispatch(
+      setFilters({
+        page: 1,
+        name: "",
+        species: "",
+        status: "",
+        gender: "",
+      })
+    );
     setError("");
     setIsValid(true);
   };
 
   useEffect(() => {
-    setLocalNameFilter(nameFilter);
+    setLocalNameFilter(filters.name);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     const delayInputTimeoutId = setTimeout(() => {
-      setNameFilter(localNameFilter);
+      if (localNameFilter !== filters.name) {
+        dispatch(setFilters({ name: localNameFilter, page: 1 }));
+      }
     }, 500);
     return () => clearTimeout(delayInputTimeoutId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -60,10 +62,12 @@ const CharacterFilter = () => {
     setError("");
     setIsValid(true);
 
-    if (str.match(/^[a-zA-Z0-9\s-]*$/)) {
+    if (str.match(/^[a-zA-Z0-9\s-'.]*$/)) {
       setLocalNameFilter(str);
     } else {
-      setError("Key not allowed");
+      setError(
+        "English letters, numbers, dots, spaces, dashes or single quotes"
+      );
       setIsValid(false);
     }
   };
@@ -90,10 +94,9 @@ const CharacterFilter = () => {
             <Select
               labelId="species-label"
               label="Species"
-              value={speciesFilter}
+              value={filters.species}
               onChange={(e) => {
-                setSpeciesFilter(e.target.value);
-                setCurrentPage(1);
+                dispatch(setFilters({ species: e.target.value, page: 1 }));
               }}
             >
               {speciesOptions.map((specie) => (
@@ -110,10 +113,14 @@ const CharacterFilter = () => {
             <Select
               labelId="status-label"
               label="Status"
-              value={statusFilter}
+              value={filters.status}
               onChange={(e) => {
-                setStatusFilter(e.target.value);
-                setCurrentPage(1);
+                dispatch(
+                  setFilters({
+                    status: e.target.value as CharacterStatus,
+                    page: 1,
+                  })
+                );
               }}
             >
               {statusOptions.map((status) => (
@@ -130,10 +137,14 @@ const CharacterFilter = () => {
             <Select
               labelId="gender-label"
               label="Gender"
-              value={genderFilter}
+              value={filters.gender}
               onChange={(e) => {
-                setGenderFilter(e.target.value);
-                setCurrentPage(1);
+                dispatch(
+                  setFilters({
+                    gender: e.target.value as CharacterGender,
+                    page: 1,
+                  })
+                );
               }}
             >
               {genderOptions.map((gender) => (
@@ -154,4 +165,4 @@ const CharacterFilter = () => {
   );
 };
 
-export default CharacterFilter;
+export default CharacterFilterRedux;

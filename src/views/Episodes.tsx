@@ -46,7 +46,9 @@ const Episodes = () => {
     searchParams.get("name") || ""
   );
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-  const [sortedColumn, setSortedColumn] = useState<string>("id");
+  const [sortedColumn, setSortedColumn] = useState<
+    "id" | "name" | "episode" | "air_date"
+  >("id");
   const { themeName } = useLocalStorage();
 
   const getEpisodes = async function () {
@@ -127,17 +129,29 @@ const Episodes = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedNameFilter]);
 
-  const handleSort = (column: string) => {
+  const handleSort = (column: "id" | "name" | "episode" | "air_date") => {
     const newSortOrder =
       sortedColumn === column && sortOrder === "asc" ? "desc" : "asc";
     setSortOrder(newSortOrder);
     setSortedColumn(column);
 
     const sortedEpisodes = [...episodes].sort((a, b) => {
-      if (newSortOrder === "asc") {
-        return a.id < b.id ? -1 : 1;
-      } else {
-        return b.id < a.id ? -1 : 1;
+      switch (column) {
+        case "id":
+          return newSortOrder === "asc"
+            ? a[column] - b[column]
+            : b[column] - a[column];
+        case "name":
+        case "episode":
+          return newSortOrder === "asc"
+            ? a[column].localeCompare(b[column])
+            : b[column].localeCompare(a[column]);
+        case "air_date":
+          return newSortOrder === "asc"
+            ? Date.parse(a[column]) - Date.parse(b[column])
+            : Date.parse(b[column]) - Date.parse(a[column]);
+        default:
+          return 0;
       }
     });
 
@@ -190,9 +204,39 @@ const Episodes = () => {
                     ID
                   </TableSortLabel>
                 </TableCell>
-                <TableCell align="left">Name</TableCell>
-                <TableCell align="right">Episode</TableCell>
-                <TableCell align="right">Air Date</TableCell>
+                <TableCell align="left">
+                  <TableSortLabel
+                    active={sortedColumn === "name"}
+                    direction={sortOrder}
+                    onClick={() => {
+                      handleSort("name");
+                    }}
+                  >
+                    Name
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell align="right">
+                  <TableSortLabel
+                    active={sortedColumn === "episode"}
+                    direction={sortOrder}
+                    onClick={() => {
+                      handleSort("episode");
+                    }}
+                  >
+                    Episode
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell align="right">
+                  <TableSortLabel
+                    active={sortedColumn === "air_date"}
+                    direction={sortOrder}
+                    onClick={() => {
+                      handleSort("air_date");
+                    }}
+                  >
+                    Air date
+                  </TableSortLabel>
+                </TableCell>
                 <TableCell align="right">Watchlist</TableCell>
               </TableRow>
             </TableHead>

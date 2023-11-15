@@ -38,7 +38,9 @@ const Locations = () => {
     searchParams.get("name") || ""
   );
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-  const [sortedColumn, setSortedColumn] = useState<string>("id");
+  const [sortedColumn, setSortedColumn] = useState<
+    "id" | "name" | "type" | "dimension"
+  >("id");
   const { themeName } = useLocalStorage();
 
   const getLocations = async function () {
@@ -87,17 +89,22 @@ const Locations = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedNameFilter]);
 
-  const handleSort = (column: string) => {
+  const handleSort = (column: "id" | "name" | "type" | "dimension") => {
     const newSortOrder =
       sortedColumn === column && sortOrder === "asc" ? "desc" : "asc";
     setSortOrder(newSortOrder);
     setSortedColumn(column);
 
     const sortedLocations = [...locations].sort((a, b) => {
-      if (newSortOrder === "asc") {
-        return a.id < b.id ? -1 : 1;
-      } else {
-        return b.id < a.id ? -1 : 1;
+      switch (column) {
+        case "id":
+          return newSortOrder === "asc"
+            ? a[column] - b[column]
+            : b[column] - a[column];
+        default:
+          return newSortOrder === "asc"
+            ? a[column].localeCompare(b[column])
+            : b[column].localeCompare(a[column]);
       }
     });
 
@@ -150,9 +157,39 @@ const Locations = () => {
                     ID
                   </TableSortLabel>
                 </TableCell>
-                <TableCell align="left">Name</TableCell>
-                <TableCell align="right">Type</TableCell>
-                <TableCell align="right">Dimension</TableCell>
+                <TableCell align="left">
+                  <TableSortLabel
+                    active={sortedColumn === "name"}
+                    direction={sortOrder}
+                    onClick={() => {
+                      handleSort("name");
+                    }}
+                  >
+                    Name
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell align="right">
+                  <TableSortLabel
+                    active={sortedColumn === "type"}
+                    direction={sortOrder}
+                    onClick={() => {
+                      handleSort("type");
+                    }}
+                  >
+                    Type
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell align="right">
+                  <TableSortLabel
+                    active={sortedColumn === "dimension"}
+                    direction={sortOrder}
+                    onClick={() => {
+                      handleSort("dimension");
+                    }}
+                  >
+                    Dimension
+                  </TableSortLabel>
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>

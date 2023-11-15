@@ -17,16 +17,18 @@ import useLocalStorage from "../hooks/localStorage";
 const Watchlist = () => {
   const [watchlist, setWatchlist] = useState<WatchlistEpisode[]>([]);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-  const [sortedColumn, setSortedColumn] = useState<string>("id");
+  const [sortedColumn, setSortedColumn] = useState<"id" | "name" | "episode">(
+    "id"
+  );
   const { themeName } = useLocalStorage();
 
   useEffect(() => {
-    const loadLocalStorage = async () => {
-      const savedWatchlist = await localStorage.getItem("watchlist");
+    const loadLocalStorage = () => {
+      const savedWatchlist = localStorage.getItem("watchlist");
       let savedWatchlistParsed;
 
       if (savedWatchlist) {
-        savedWatchlistParsed = await JSON.parse(savedWatchlist);
+        savedWatchlistParsed = JSON.parse(savedWatchlist);
       }
 
       if (Array.isArray(savedWatchlistParsed)) {
@@ -60,17 +62,25 @@ const Watchlist = () => {
     localStorage.setItem("watchlist", JSON.stringify(updatedWatchlist));
   };
 
-  const handleSort = (column: string) => {
+  const handleSort = (column: "id" | "name" | "episode") => {
     const newSortOrder =
       sortedColumn === column && sortOrder === "asc" ? "desc" : "asc";
     setSortOrder(newSortOrder);
     setSortedColumn(column);
 
     const sortedWatchlist = [...watchlist].sort((a, b) => {
-      if (newSortOrder === "asc") {
-        return a.id < b.id ? -1 : 1;
-      } else {
-        return b.id < a.id ? -1 : 1;
+      switch (column) {
+        case "id":
+          return newSortOrder === "asc"
+            ? a[column] - b[column]
+            : b[column] - a[column];
+        case "name":
+        case "episode":
+          return newSortOrder === "asc"
+            ? a[column].localeCompare(b[column])
+            : b[column].localeCompare(a[column]);
+        default:
+          return 0;
       }
     });
 
@@ -79,7 +89,7 @@ const Watchlist = () => {
 
   return (
     <>
-      {watchlist.length === 0 && (
+      {!watchlist.length && (
         <Typography>Add episodes to the watchlist</Typography>
       )}
       {watchlist.length > 0 && (
@@ -101,8 +111,28 @@ const Watchlist = () => {
                     ID
                   </TableSortLabel>
                 </TableCell>
-                <TableCell align="left">Name</TableCell>
-                <TableCell align="right">Episode</TableCell>
+                <TableCell align="left">
+                  <TableSortLabel
+                    active={sortedColumn === "name"}
+                    direction={sortOrder}
+                    onClick={() => {
+                      handleSort("name");
+                    }}
+                  >
+                    Name
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell align="right">
+                  <TableSortLabel
+                    active={sortedColumn === "episode"}
+                    direction={sortOrder}
+                    onClick={() => {
+                      handleSort("episode");
+                    }}
+                  >
+                    Episode
+                  </TableSortLabel>
+                </TableCell>
                 <TableCell align="right">Watched</TableCell>
                 <TableCell align="right">Delete</TableCell>
               </TableRow>

@@ -19,6 +19,15 @@ export interface CharacterContextType {
   setGenderFilter: (genderFilter: string) => void;
 }
 
+export interface CharacterReduxType {
+  characters: Character[];
+  error: boolean;
+  errorMessage: string;
+  loading: boolean;
+  pagination: PaginationType | undefined;
+  filters: CharacterFilter;
+}
+
 export interface PaginationType {
   count: number;
   next: string | null;
@@ -45,12 +54,12 @@ export interface Endpoints {
 }
 
 export interface CharacterFilter {
+  page: number;
   name?: string;
   type?: string;
   species?: string;
   status?: CharacterStatus;
   gender?: CharacterGender;
-  page?: number;
 }
 
 export interface LocationFilter

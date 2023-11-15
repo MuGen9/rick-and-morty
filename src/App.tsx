@@ -7,7 +7,6 @@ import Characters from "./views/Characters";
 import Episodes from "./views/Episodes";
 import Locations from "./views/Locations";
 import Watchlist from "./views/Watchlist";
-import { CharacterContextProvider } from "./providers/CharacterContextProvider";
 import useLocalStorage from "./hooks/localStorage";
 
 function App() {
@@ -25,14 +24,7 @@ function App() {
       <Header />
       <Routes>
         <Route index element={<Home />} />
-        <Route
-          path={appRoutes.characters}
-          element={
-            <CharacterContextProvider>
-              <Characters />
-            </CharacterContextProvider>
-          }
-        />
+        <Route path={appRoutes.characters} element={<Characters />} />
         <Route path={appRoutes.episodes} element={<Episodes />} />
         <Route path={appRoutes.locations} element={<Locations />} />
         <Route path={appRoutes.watchlist} element={<Watchlist />} />

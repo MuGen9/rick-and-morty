@@ -12,8 +12,8 @@ export function capitalizeFirstLetter(str: string) {
 }
 
 export const createSearchParams = (
-  currentPage: number,
-  nameFilter: string,
+  currentPage?: number,
+  nameFilter?: string,
   speciesFilter?: string,
   statusFilter?: string,
   genderFilter?: string
